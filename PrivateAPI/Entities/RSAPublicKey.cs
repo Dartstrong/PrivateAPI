@@ -5,23 +5,15 @@ using System.Threading.Tasks;
 
 namespace PrivateAPI.Entity
 {
-    public class AsymPublicKey
+    public class RSAPublicKey
     {
-        public string StrKey
+        public string ModulusStr { get { return ModulusStr; } set { Modulus = StrToByteArray(value); } }
+        public string ExponentStr { get { return ExponentStr; } set { Exponent = StrToByteArray(value); } }
+        public byte[] Modulus { get; private set; }
+        public byte[] Exponent { get; private set; }
+        private static byte[] StrToByteArray(string str)
         {
-            get
-            {
-                return StrKey;
-            }
-            set
-            {
-                ByteArrayKey = StrToByteArray(value);
-            }
-        }
-        public byte[] ByteArrayKey { get; private set; }
-        private static byte[] StrToByteArray(string strKey)
-        {
-            string[] arrayStr = strKey.Split('-');
+            string[] arrayStr = str.Split('-');
             int[] arrayInt = new int[arrayStr.Length];
             for (int i = 0; i < arrayStr.Length; i++)
             {

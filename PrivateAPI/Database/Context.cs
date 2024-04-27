@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace PrivateAPI.DataBaseContext
+namespace PrivateAPI.Models
 {
-    public class Context
+    public class Context: DbContext
     {
+        public Context(DbContextOptions<Context> options) : base(options) { }
+        public virtual DbSet<Session> Sessions { get; set; }
     }
 }
