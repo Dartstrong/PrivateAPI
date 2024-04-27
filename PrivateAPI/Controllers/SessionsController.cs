@@ -15,9 +15,9 @@ namespace PrivateAPI.Controllers
             _sessionsRepository = sessionsRepository;
         }
         [HttpPost]
-        public async Task<ActionResult<Session>> StartSession([FromBody] RSAPublicKey asymPublicKey)
+        public async Task<ActionResult<Session>> StartSession([FromBody] RSAPublicKey rsaPublicKey)
         {
-            return await _sessionsRepository.CreateNewSession(asymPublicKey.ByteArrayKey);
+            return await _sessionsRepository.CreateNewSession(rsaPublicKey);
         }
     }
 }

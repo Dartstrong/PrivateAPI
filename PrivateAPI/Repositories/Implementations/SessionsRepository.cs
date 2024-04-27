@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using PrivateAPI.Repositories.Interfaces;
 using PrivateAPI.Models;
+using PrivateAPI.Entity;
 
 namespace PrivateAPI.Repositories.Implementations
 {
@@ -17,7 +18,7 @@ namespace PrivateAPI.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<ActionResult<Session>> CreateNewSession(byte[] publicKey)
+        public async Task<ActionResult<Session>> CreateNewSession(RSAPublicKey rsaPublicKey)
         {
             Session session = new();
             Aes aes = Aes.Create();
@@ -28,9 +29,12 @@ namespace PrivateAPI.Repositories.Implementations
             session.LastUsed = DateTime.Now;
             _context.Sessions.Add(session);
             await _context.SaveChangesAsync();
-            session.SymmetricKey = IntArrayToStr(ByteArrayToIntArray(Encrypt(aes.Key, publicKey)));
-            session.InitVector = IntArrayToStr(ByteArrayToIntArray(Encrypt(aes.IV, publicKey)));
-            
+
+            RSAParameters rsaParameters = new RSAParameters();
+            rsaParameters.Modulus = rsaPublicKey.Modulus;
+            rsaParameters.Exponent = rsaPublicKey.Exponent;
+            session.SymmetricKey = IntArrayToStr(ByteArrayToIntArray(Encrypt(aes.Key, rsaParameters)));
+            session.InitVector = IntArrayToStr(ByteArrayToIntArray(Encrypt(aes.IV, rsaParameters)));      
             return session;
         }
 
@@ -46,12 +50,14 @@ namespace PrivateAPI.Repositories.Implementations
             }
         }*/
 
-        public byte[] Encrypt(byte[] data, byte[] publicKey)
+        public byte[] Encrypt(byte[] data, RSAParameters publicKey)
         {
-            RSA rsa = RSA.Create();
-            rsa.ImportRSAPublicKey(publicKey, out _);
-            byte[] encryptedData = rsa.Encrypt(data, RSAEncryptionPadding.Pkcs1);
-            return encryptedData;
+            using (RSA rsa = RSA.Create())
+            {
+                rsa.ImportParameters(publicKey);
+                byte[] encryptedData = rsa.Encrypt(data, RSAEncryptionPadding.OaepSHA1);
+                return encryptedData;
+            }
         }
 
         public int[] ByteArrayToIntArray(byte[] data)
