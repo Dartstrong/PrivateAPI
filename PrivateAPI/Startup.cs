@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using PrivateAPI.Repositories.Implementations;
 using PrivateAPI.Repositories.Interfaces;
 using PrivateAPI.Models;
-
 namespace PrivateAPI
 {
     public class Startup
@@ -23,6 +22,7 @@ namespace PrivateAPI
             services.AddControllers();
             services.AddMvc();
             services.AddTransient<ISessionsRepository, SessionsRepository>();
+            services.AddTransient<IAutorizationsRepository, AutorizationsRepository>();
             services.AddDbContext<Context>(options => options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
         }
 
