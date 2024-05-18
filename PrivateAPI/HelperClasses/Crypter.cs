@@ -18,7 +18,7 @@ namespace PrivateAPI.HelperClasses
                 return ByteArrayToIntArrayToStr(encryptedData);
             }
         }
-        public string Encrypt(byte[] data, Session session)
+        public string Encrypt(string data, Session session)
         {
             using (Aes aes = Aes.Create())
             {
@@ -47,7 +47,7 @@ namespace PrivateAPI.HelperClasses
                 aes.Key = StrToIntArrayToByteArray(session.SymmetricKey);
                 aes.IV = StrToIntArrayToByteArray(session.InitVector);
                 ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                using (MemoryStream msDecrypt = new(authorizationData.Login))
+                using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.LoginStr)))
                 {
                     using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
                     {
@@ -57,7 +57,7 @@ namespace PrivateAPI.HelperClasses
                         }
                     }
                 }
-                using (MemoryStream msDecrypt = new(authorizationData.Password))
+                using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.PasswordStr)))
                 {
                     using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
                     {
@@ -71,9 +71,9 @@ namespace PrivateAPI.HelperClasses
                         }
                     }
                 }
-                if(authorizationData.Email!=null)
+                if(authorizationData.EmailStr!=null)
                 {
-                    using (MemoryStream msDecrypt = new(authorizationData.Email))
+                    using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.EmailStr)))
                     {
                         using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
                         {
@@ -84,17 +84,13 @@ namespace PrivateAPI.HelperClasses
                         }
                     }
                 }
-                if(authorizationData.DeviceId!=null)
+                using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.DeviceIdStr)))
                 {
-                    using (MemoryStream msDecrypt = new(authorizationData.DeviceId))
+                    using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
                     {
-                        using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
+                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
                         {
-                            using (var msPlain = new MemoryStream())
-                            {
-                                csDecrypt.CopyTo(msPlain);
-                                decryptedDeviceID.Id = BitConverter.ToInt32(msPlain.ToArray(),0);
-                            }
+                            decryptedDeviceID.Id = Int16.Parse(srDecrypt.ReadToEnd());
                         }
                     }
                 }

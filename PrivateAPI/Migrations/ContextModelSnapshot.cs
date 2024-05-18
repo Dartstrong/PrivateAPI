@@ -47,9 +47,6 @@ namespace PrivateAPI.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("AccountID")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.ToTable("DeviceID");

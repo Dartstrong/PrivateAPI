@@ -10,7 +10,7 @@ using PrivateAPI.Models;
 namespace PrivateAPI.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240509145641_InitialCreate")]
+    [Migration("20240511101853_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,9 +48,6 @@ namespace PrivateAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int>("AccountID")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

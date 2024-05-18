@@ -13,10 +13,20 @@ namespace PrivateAPI.Controllers
         {
             _autorizationsRepository = autorizationsRepository;
         }
-        [HttpPost("newuser/{sessionID}")]
-        public async Task<ActionResult<NewDeviceID>> StartSession([FromBody] AuthorizationData authorizationData, int sessionID)
+        [HttpGet("newdevice/{sessionId}")]
+        public async Task<ActionResult<NewDeviceID>> CreateDevice(int sessionId)
         {
-            return await _autorizationsRepository.CreateAccount(authorizationData, sessionID);
+            return await _autorizationsRepository.CreateDevice(sessionId);
+        }
+        [HttpPost("newuser/{sessionId}")]
+        public async Task<ActionResult> CreateAccount([FromBody] AuthorizationData authorizationData, int sessionId)
+        {
+            return await _autorizationsRepository.CreateAccount(authorizationData, sessionId);
+        }
+        [HttpPost("entry/{sessionId}")]
+        public async Task<ActionResult> Autorization([FromBody] AuthorizationData authorizationData, int sessionId)
+        {
+            return await _autorizationsRepository.Autorization(authorizationData, sessionId);
         }
     }
 }

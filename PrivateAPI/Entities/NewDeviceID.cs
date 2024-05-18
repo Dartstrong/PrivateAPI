@@ -2,6 +2,6 @@
 {
     public class NewDeviceID
     {
-        public string DeviceID { get; set; }
+        public string DeviceIdStr { get; set; }
     }
 }

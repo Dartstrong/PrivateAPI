@@ -29,8 +29,8 @@ namespace PrivateAPI.Repositories.Implementations
             _context.Sessions.Add(session);
             await _context.SaveChangesAsync();
             RSAParameters rsaParameters = new();
-            rsaParameters.Modulus = rsaPublicKey.Modulus;
-            rsaParameters.Exponent = rsaPublicKey.Exponent;
+            rsaParameters.Modulus = StrToIntArrayToByteArray(rsaPublicKey.ModulusStr);
+            rsaParameters.Exponent = StrToIntArrayToByteArray(rsaPublicKey.ExponentStr);
             Crypter crypter = new();
             session.SymmetricKey = crypter.Encrypt(aes.Key, rsaParameters);
             session.InitVector = crypter.Encrypt(aes.IV, rsaParameters);      
