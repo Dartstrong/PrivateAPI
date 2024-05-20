@@ -24,7 +24,7 @@ namespace PrivateAPI.Controllers
             return await _autorizationsRepository.CreateAccount(authorizationData, sessionId);
         }
         [HttpPost("entry/{sessionId}")]
-        public async Task<ActionResult> Autorization([FromBody] AuthorizationData authorizationData, int sessionId)
+        public async Task<StatusCodeResult> Autorization([FromBody] AuthorizationData authorizationData, int sessionId)
         {
             return await _autorizationsRepository.Autorization(authorizationData, sessionId);
         }

@@ -10,7 +10,7 @@ using PrivateAPI.Models;
 namespace PrivateAPI.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240511101853_InitialCreate")]
+    [Migration("20240519090545_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,24 @@ namespace PrivateAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DeviceID");
+                });
+
+            modelBuilder.Entity("PrivateAPI.Models.LoginHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeviceId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoginHistories");
                 });
 
             modelBuilder.Entity("PrivateAPI.Models.Session", b =>

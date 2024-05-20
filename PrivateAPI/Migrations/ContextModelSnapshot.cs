@@ -52,6 +52,24 @@ namespace PrivateAPI.Migrations
                     b.ToTable("DeviceID");
                 });
 
+            modelBuilder.Entity("PrivateAPI.Models.LoginHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DeviceId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoginHistories");
+                });
+
             modelBuilder.Entity("PrivateAPI.Models.Session", b =>
                 {
                     b.Property<int>("Id")

@@ -8,5 +8,6 @@ namespace PrivateAPI.Models
         public virtual DbSet<Session> Sessions { get; set; }
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<DeviceID> DeviceID { get; set; }
+        public virtual DbSet<LoginHistory> LoginHistories { get; set; }
     }
 }

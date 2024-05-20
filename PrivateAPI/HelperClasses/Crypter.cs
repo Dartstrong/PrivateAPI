@@ -47,55 +47,44 @@ namespace PrivateAPI.HelperClasses
                 aes.Key = StrToIntArrayToByteArray(session.SymmetricKey);
                 aes.IV = StrToIntArrayToByteArray(session.InitVector);
                 ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.LoginStr)))
+                decryptedAccount.Login = DecryptAES(authorizationData.LoginStr, decryptor);
+                decryptedAccount.Sample = ByteArrayToIntArrayToStr(new MD5CryptoServiceProvider().ComputeHash(Encoding.ASCII.GetBytes(DecryptAES(authorizationData.PasswordStr, decryptor))));
+                if(authorizationData.EmailStr!=null) decryptedAccount.Email = DecryptAES(authorizationData.EmailStr, decryptor);        
+                decryptedDeviceID.Id = Int16.Parse(DecryptAES(authorizationData.DeviceIdStr, decryptor));
+            }
+            return (decryptedAccount, decryptedDeviceID);
+        }
+        public RequestStartDialogue Decrypt(RequestStartDialogue requestStartDialogue, Session session)
+        {
+            RequestStartDialogue decryptedRequestStartDialogue = new();
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = StrToIntArrayToByteArray(session.SymmetricKey);
+                aes.IV = StrToIntArrayToByteArray(session.InitVector);
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                decryptedRequestStartDialogue.Sender = DecryptAES(requestStartDialogue.Sender, decryptor);
+                decryptedRequestStartDialogue.SenderdDeviceId = DecryptAES(requestStartDialogue.SenderdDeviceId, decryptor);
+                decryptedRequestStartDialogue.Receiver = DecryptAES(requestStartDialogue.Receiver, decryptor);
+                decryptedRequestStartDialogue.PublicKeyModulus = DecryptAES(requestStartDialogue.PublicKeyModulus, decryptor);
+                decryptedRequestStartDialogue.PublicKeyExponent = DecryptAES(requestStartDialogue.PublicKeyExponent, decryptor);
+            }
+        }
+        private string DecryptAES(string data, ICryptoTransform decryptor)
+        {
+            using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(data)))
+            {
+                using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
                 {
-                    using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
+                    using (StreamReader srDecrypt = new(csDecrypt))
                     {
-                        using (StreamReader srDecrypt = new(csDecrypt))
-                        {
-                            decryptedAccount.Login = srDecrypt.ReadToEnd();
-                        }
-                    }
-                }
-                using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.PasswordStr)))
-                {
-                    using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (var msPlain = new MemoryStream())
-                        {
-                            csDecrypt.CopyTo(msPlain);
-                            byte[] tmpByteArray = new byte[msPlain.ToArray().Length + Encoding.UTF8.GetBytes(decryptedAccount.Login).Length];
-                            Array.Copy(msPlain.ToArray(), 0, tmpByteArray, 0, msPlain.ToArray().Length);
-                            Array.Copy(Encoding.UTF8.GetBytes(decryptedAccount.Login), 0, tmpByteArray, msPlain.ToArray().Length, Encoding.UTF8.GetBytes(decryptedAccount.Login).Length);
-                            decryptedAccount.Sample = ByteArrayToIntArrayToStr(new MD5CryptoServiceProvider().ComputeHash(tmpByteArray));
-                        }
-                    }
-                }
-                if(authorizationData.EmailStr!=null)
-                {
-                    using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.EmailStr)))
-                    {
-                        using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
-                        {
-                            using (StreamReader srDecrypt = new(csDecrypt))
-                            {
-                                decryptedAccount.Email= srDecrypt.ReadToEnd();
-                            }
-                        }
-                    }
-                }
-                using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(authorizationData.DeviceIdStr)))
-                {
-                    using (CryptoStream csDecrypt = new(msDecrypt, decryptor, CryptoStreamMode.Read))
-                    {
-                        using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                        {
-                            decryptedDeviceID.Id = Int16.Parse(srDecrypt.ReadToEnd());
-                        }
+                        string result = srDecrypt.ReadToEnd();
+                        srDecrypt.Close();
+                        csDecrypt.Close();
+                        msDecrypt.Close();
+                        return result;
                     }
                 }
             }
-            return (decryptedAccount, decryptedDeviceID);
         }
     }
 }

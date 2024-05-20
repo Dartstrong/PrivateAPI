@@ -7,7 +7,7 @@ namespace PrivateAPI.Repositories.Interfaces
     public interface IAutorizationsRepository
     {
         Task<ActionResult<NewDeviceID>> CreateDevice(int sessionId);
-        Task<ActionResult> CreateAccount(AuthorizationData authorizationData, int sessionId);
-        Task<ActionResult> Autorization(AuthorizationData authorizationData, int sessionId);
+        Task<StatusCodeResult> CreateAccount(AuthorizationData authorizationData, int sessionId);
+        Task<StatusCodeResult> Autorization(AuthorizationData authorizationData, int sessionId);
     }
 }
