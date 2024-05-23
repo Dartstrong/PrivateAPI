@@ -54,20 +54,25 @@ namespace PrivateAPI.HelperClasses
             }
             return (decryptedAccount, decryptedDeviceID);
         }
-        public RequestStartDialogue Decrypt(RequestStartDialogue requestStartDialogue, Session session)
+        public (Account, DeviceID, string, RSAPublicKey) Decrypt(RequestStartDialogue requestStartDialogue, Session session)
         {
-            RequestStartDialogue decryptedRequestStartDialogue = new();
+            Account decryptedAccount = new();
+            DeviceID decryptedDeviceId = new();
+            string decryptedReceiverLogin;
+            RSAPublicKey decryptedPublicKey = new();
             using (Aes aes = Aes.Create())
             {
                 aes.Key = StrToIntArrayToByteArray(session.SymmetricKey);
                 aes.IV = StrToIntArrayToByteArray(session.InitVector);
                 ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-                decryptedRequestStartDialogue.Sender = DecryptAES(requestStartDialogue.Sender, decryptor);
-                decryptedRequestStartDialogue.SenderdDeviceId = DecryptAES(requestStartDialogue.SenderdDeviceId, decryptor);
-                decryptedRequestStartDialogue.Receiver = DecryptAES(requestStartDialogue.Receiver, decryptor);
-                decryptedRequestStartDialogue.PublicKeyModulus = DecryptAES(requestStartDialogue.PublicKeyModulus, decryptor);
-                decryptedRequestStartDialogue.PublicKeyExponent = DecryptAES(requestStartDialogue.PublicKeyExponent, decryptor);
+                decryptedAccount.Login = DecryptAES(requestStartDialogue.Sender, decryptor);
+                decryptedAccount.Sample = ByteArrayToIntArrayToStr(new MD5CryptoServiceProvider().ComputeHash(Encoding.ASCII.GetBytes(DecryptAES(requestStartDialogue.SenderPassword, decryptor))));
+                decryptedDeviceId.Id = Int16.Parse(DecryptAES(requestStartDialogue.SenderdDeviceId, decryptor));
+                decryptedReceiverLogin = DecryptAES(requestStartDialogue.Receiver, decryptor);
+                decryptedPublicKey.ModulusStr = DecryptAES(requestStartDialogue.PublicKeyModulus, decryptor);
+                decryptedPublicKey.ExponentStr = DecryptAES(requestStartDialogue.PublicKeyExponent, decryptor);
             }
+            return (decryptedAccount, decryptedDeviceId, decryptedReceiverLogin, decryptedPublicKey);
         }
         private string DecryptAES(string data, ICryptoTransform decryptor)
         {

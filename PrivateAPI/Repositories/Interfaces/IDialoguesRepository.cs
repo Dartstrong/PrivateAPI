@@ -8,6 +8,8 @@ namespace PrivateAPI.Repositories.Interfaces
 {
     public interface IDialoguesRepository
     {
-        Task<StatusCodeResult> CreateRequestStartDialogue(RequestStartDialogue requestStartDialogue, int sessionId);
+        Task<ActionResult<DialogueRequest>> CreateRequestStartDialogue(RequestStartDialogue requestStartDialogue, int sessionId);
+        Task<ActionResult<IEnumerable<DialogueRequest>>> RetunAllOutDialogues(AuthorizationData authorizationData, int sessionId);
+        Task<ActionResult<StatusCodeResult>> DeleteOutDialogue(AuthorizationData authorizationData, int dialogueId, int sessionId);
     }
 }

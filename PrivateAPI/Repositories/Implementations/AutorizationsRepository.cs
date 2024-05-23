@@ -32,19 +32,19 @@ namespace PrivateAPI.Repositories.Implementations
         {
             var session = await _context.Sessions.FindAsync(sessionId);
             Crypter crypter = new();
-            (Account, DeviceID) userInfo = crypter.Decrypt(authorizationData, session);
+            (Account account, DeviceID deviceId) userInfo = crypter.Decrypt(authorizationData, session);
             try
             {
-                if (_context.Accounts.FirstOrDefault(account => account.Login == userInfo.Item1.Login) == null)
+                if (!_context.Accounts.Any(account => account.Login == userInfo.account.Login))
                 {
                     _context.Accounts.Add(userInfo.Item1);
                     await _context.SaveChangesAsync();
-                    if (!_context.LoginHistories.Any(history => history.AccountId == userInfo.Item1.Id && history.DeviceId == userInfo.Item2.Id))
+                    if (!_context.LoginHistories.Any(history => history.AccountId == userInfo.account.Id && history.DeviceId == userInfo.deviceId.Id))
                     {
                         LoginHistory loginHistory = new()
                         {
-                            AccountId = userInfo.Item1.Id,
-                            DeviceId = userInfo.Item2.Id
+                            AccountId = userInfo.account.Id,
+                            DeviceId = userInfo.deviceId.Id
                         };
                         _context.LoginHistories.Add(loginHistory);
                         await _context.SaveChangesAsync();
@@ -62,26 +62,26 @@ namespace PrivateAPI.Repositories.Implementations
         {
             var session = await _context.Sessions.FindAsync(sessionId);
             Crypter crypter = new();
-            (Account, DeviceID) userInfo = crypter.Decrypt(authorizationData, session);
-            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.Item1.Login);
+            (Account account, DeviceID deviceId) userInfo = crypter.Decrypt(authorizationData, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.account.Login);
             try 
             {             
                 if (selectedAccount == null)
                 {
                     return new StatusCodeResult(401);
                 }
-                else if (selectedAccount.Sample != userInfo.Item1.Sample)
+                else if (selectedAccount.Sample != userInfo.account.Sample)
                 {
                     return new StatusCodeResult(403);
                 }
                 else
                 {
-                    if(!_context.LoginHistories.Any(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.Item2.Id))
+                    if(!_context.LoginHistories.Any(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id))
                     {
                         LoginHistory loginHistory = new()
                         {
                             AccountId = selectedAccount.Id,
-                            DeviceId = userInfo.Item2.Id
+                            DeviceId = userInfo.deviceId.Id
                         };
                         _context.LoginHistories.Add(loginHistory);
                         await _context.SaveChangesAsync();

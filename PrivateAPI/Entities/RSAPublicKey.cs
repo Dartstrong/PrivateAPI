@@ -1,5 +1,5 @@
 ﻿using PrivateAPI.HelperClasses;
-namespace PrivateAPI.Entity
+namespace PrivateAPI.Entities
 {
     public class RSAPublicKey : Converter
     {

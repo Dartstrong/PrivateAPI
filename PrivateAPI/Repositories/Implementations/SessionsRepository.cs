@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PrivateAPI.Repositories.Interfaces;
 using PrivateAPI.Models;
-using PrivateAPI.Entity;
+using PrivateAPI.Entities;
 using PrivateAPI.HelperClasses;
 namespace PrivateAPI.Repositories.Implementations
 {

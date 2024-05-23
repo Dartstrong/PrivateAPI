@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using PrivateAPI.Models;
-using PrivateAPI.Entity;
+using PrivateAPI.Entities;
 namespace PrivateAPI.Repositories.Interfaces
 {
     public interface ISessionsRepository

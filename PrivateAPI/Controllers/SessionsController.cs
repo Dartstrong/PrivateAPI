@@ -2,7 +2,7 @@
 using PrivateAPI.Models;
 using PrivateAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using PrivateAPI.Entity;
+using PrivateAPI.Entities;
 
 namespace PrivateAPI.Controllers
 {

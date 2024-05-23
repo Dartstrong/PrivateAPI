@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using PrivateAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using PrivateAPI.Entity;
 using PrivateAPI.Entities;
 namespace PrivateAPI.Controllers
 {
