@@ -23,6 +23,7 @@ namespace PrivateAPI
             services.AddMvc();
             services.AddTransient<ISessionsRepository, SessionsRepository>();
             services.AddTransient<IAutorizationsRepository, AutorizationsRepository>();
+            services.AddTransient<IDialoguesRepository, DialoguesRepository>();
             services.AddDbContext<Context>(options => options.UseNpgsql(Configuration["ConnectionStrings:DefaultConnection"]));
         }
 

@@ -40,21 +40,25 @@ namespace PrivateAPI.Repositories.Implementations
                     var receiver = _context.Accounts.FirstOrDefault(account => account.Login == requestInfo.receiverLogin);
                     if ((receiver != null) && (sender != null))
                     {
-                        NewDialogue newDialogue = new()
+                        Dialogue newDialogue = new()
                         {
-                            Sender = sender.Id,
-                            Receiver = receiver.Id,
-                            PublicKeyModulus = requestInfo.publicKey.ModulusStr,
-                            PublicKeyExponent = requestInfo.publicKey.ExponentStr,
-                            CreationTime = DateTime.Now
+                            Started = sender.AccountId,
+                            StartedDeviceId = sender.DeviceId,
+                            StartedModulusStr = requestInfo.publicKey.ModulusStr,
+                            StatedExponentStr = requestInfo.publicKey.ExponentStr,
+                            Accepted = receiver.Id,
+                            AcceptedDeviceId = null,
+                            AcceptedModulusStr = null,
+                            AcceptedExponentStr = null,
+                            LastMessage = DateTime.Now
                         };
-                        _context.NewDialogues.Add(newDialogue);
+                        _context.Dialogues.Add(newDialogue);
                         await _context.SaveChangesAsync();
                         return new DialogueRequest
                         {
                             IdStr = crypter.Encrypt(newDialogue.Id.ToString(), session),
                             Sender = crypter.Encrypt(requestInfo.senderAccount.Login, session),
-                            Receiver = crypter.Encrypt(requestInfo.receiverLogin,session)
+                            Receiver = crypter.Encrypt(requestInfo.receiverLogin, session)
                         };
                     }
                     else
@@ -68,7 +72,7 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
-        public async Task<ActionResult<IEnumerable<DialogueRequest?>>> RetunAllOutDialogues(AuthorizationData authorizationData, int sessionId)
+        public async Task<ActionResult<IEnumerable<DialogueRequest?>>> RetunAllOutcomingDialogues(AuthorizationData authorizationData, int sessionId)
         {
             var session = await _context.Sessions.FindAsync(sessionId);
             Crypter crypter = new();
@@ -86,27 +90,20 @@ namespace PrivateAPI.Repositories.Implementations
                 }
                 else
                 {
-                    var selectedHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
-                    if (selectedHistory==null)
+                    var selectedDialogues = await _context.Dialogues.Where(dialogue => dialogue.Started == selectedAccount.Id &&
+                                                                            dialogue.StartedDeviceId == userInfo.deviceId.Id
+                                                                            && dialogue.AcceptedDeviceId == null).ToListAsync();
+                    List<DialogueRequest> outRequests = new();
+                    foreach (var dialogue in selectedDialogues)
                     {
-                        return new StatusCodeResult(400);
-                    }
-                    else
-                    {
-                        var selectedDialogues = await _context.NewDialogues.Where(dialogue => dialogue.Sender == selectedHistory.Id).ToListAsync();
-                        List<DialogueRequest> outRequests = new();
-                        foreach(var dialogue in selectedDialogues)
+                        outRequests.Add(new DialogueRequest
                         {
-
-                            outRequests.Add(new DialogueRequest
-                            {
-                                IdStr = crypter.Encrypt(dialogue.Id.ToString(), session),
-                                Sender = crypter.Encrypt(userInfo.account.Login, session),
-                                Receiver = crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Receiver).Login, session)
-                            });
-                        }
-                        return outRequests;
+                            IdStr = crypter.Encrypt(dialogue.Id.ToString(), session),
+                            Sender = crypter.Encrypt(userInfo.account.Login, session),
+                            Receiver = crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Accepted).Login, session)
+                        });
                     }
+                    return outRequests;
                 }
             }
             catch
@@ -114,6 +111,9 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
+    }
+}
+        /*
         public async Task<ActionResult<StatusCodeResult>> DeleteOutDialogue(AuthorizationData authorizationData, int dialogueId, int sessionId)
         {
             var session = await _context.Sessions.FindAsync(sessionId);
@@ -155,5 +155,52 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
+
+        public async Task<ActionResult<IEnumerable<DialogueRequest?>>> RetunAllIncomingDialogues(AuthorizationData authorizationData, int sessionId)
+        {
+            var session = await _context.Sessions.FindAsync(sessionId);
+            Crypter crypter = new();
+            (Account account, DeviceID deviceId) userInfo = crypter.Decrypt(authorizationData, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.account.Login);
+            try
+            {
+                if (selectedAccount == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else if (selectedAccount.Sample != userInfo.account.Sample)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else
+                {
+                    var selectedHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
+                    if (selectedHistory == null)
+                    {
+                        return new StatusCodeResult(400);
+                    }
+                    else
+                    {
+                        var selectedDialogues = await _context.NewDialogues.Where(dialogue => dialogue.Sender == selectedHistory.Id).ToListAsync();
+                        List<DialogueRequest> outRequests = new();
+                        foreach (var dialogue in selectedDialogues)
+                        {
+
+                            outRequests.Add(new DialogueRequest
+                            {
+                                IdStr = crypter.Encrypt(dialogue.Id.ToString(), session),
+                                Sender = crypter.Encrypt(userInfo.account.Login, session),
+                                Receiver = crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Receiver).Login, session)
+                            });
+                        }
+                        return outRequests;
+                    }
+                }
+            }
+            catch
+            {
+                return new StatusCodeResult(400);
+            }
+        }
     }
-}
+}*/
