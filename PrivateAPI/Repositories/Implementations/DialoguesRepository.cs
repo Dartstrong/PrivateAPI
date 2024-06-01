@@ -111,10 +111,7 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
-    }
-}
-        /*
-        public async Task<ActionResult<StatusCodeResult>> DeleteOutDialogue(AuthorizationData authorizationData, int dialogueId, int sessionId)
+        public async Task<StatusCodeResult> DeleteOutDialogue(AuthorizationData authorizationData, int dialogueId, int sessionId)
         {
             var session = await _context.Sessions.FindAsync(sessionId);
             Crypter crypter = new();
@@ -132,17 +129,16 @@ namespace PrivateAPI.Repositories.Implementations
                 }
                 else
                 {
-                    var selectedHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
-                    if (selectedHistory == null)
+                    var selectedDialogue = await _context.Dialogues.FindAsync(dialogueId);
+                    if (selectedDialogue == null)
                     {
                         return new StatusCodeResult(400);
                     }
                     else
                     {
-                        var selectedDialogue = await _context.NewDialogues.FindAsync(dialogueId);
-                        if (selectedDialogue.Sender == selectedHistory.Id)
+                        if (selectedDialogue.Started == selectedAccount.Id)
                         {
-                            _context.NewDialogues.Remove(selectedDialogue);
+                            _context.Dialogues.Remove(selectedDialogue);
                             await _context.SaveChangesAsync();
                             return new StatusCodeResult(200);
                         }
@@ -155,7 +151,9 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
-
+    }
+}
+    /*
         public async Task<ActionResult<IEnumerable<DialogueRequest?>>> RetunAllIncomingDialogues(AuthorizationData authorizationData, int sessionId)
         {
             var session = await _context.Sessions.FindAsync(sessionId);

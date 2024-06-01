@@ -8,5 +8,6 @@ namespace PrivateAPI.Models
         public int DialogueId { get; set; }
         public string Data { get; set; }
         public DateTime ReceivedServer { get; set; }
+        public int Sender { get; set; }
     }
 }

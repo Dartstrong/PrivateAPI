@@ -21,16 +21,18 @@ namespace PrivateAPI.Controllers
         {
             return await _dialoguesRepository.CreateRequestStartDialogue(requestStartDialogue, sessionId);
         }
-        /*[HttpPost("getoutcomingdialogues/{sessionId}")]
+        [HttpPost("getoutcomingdialogues/{sessionId}")]
         public async Task<ActionResult<IEnumerable<DialogueRequest>>>GetOutDialogues([FromBody] AuthorizationData authorizationData, int sessionId)
         {
             return await _dialoguesRepository.RetunAllOutcomingDialogues(authorizationData, sessionId);
         }
+
         [HttpPost("deleteoutdialogue/{dialogueId}/{sessionId}")]
-        public async Task<ActionResult<StatusCodeResult>> DeleteOutcomingDialogue([FromBody] AuthorizationData authorizationData, int dialogueId, int sessionId)
+        public async Task<StatusCodeResult> DeleteOutcomingDialogue([FromBody] AuthorizationData authorizationData, int dialogueId, int sessionId)
         {
             return await _dialoguesRepository.DeleteOutDialogue(authorizationData, dialogueId, sessionId);
         }
+        /*
         [HttpPost("getincomingdialogues/{sessionId}")]
         public async Task<ActionResult<IEnumerable<DialogueRequest>>> GetIncomingDialogues([FromBody] AuthorizationData authorizationData, int sessionId)
         {
