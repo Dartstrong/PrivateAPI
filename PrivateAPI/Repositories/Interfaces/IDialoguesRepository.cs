@@ -10,9 +10,9 @@ namespace PrivateAPI.Repositories.Interfaces
     {
         Task<ActionResult<DialogueRequest>> CreateRequestStartDialogue(RequestStartDialogue requestStartDialogue, int sessionId);
         Task<ActionResult<IEnumerable<DialogueRequest>>> RetunAllOutcomingDialogues(AuthorizationData authorizationData, int sessionId);
-        
         Task<StatusCodeResult> DeleteOutDialogue(AuthorizationData authorizationData, int dialogueId, int sessionId);
         Task<ActionResult<IEnumerable<DialogueRequest>>> RetunAllIncomingDialogues(AuthorizationData authorizationData, int sessionId);
         Task<StatusCodeResult> AcceptInDialogue(RequestAcceptDialogue requestAcceptDialogue, int dialogueId, int sessionId);
+        Task<ActionResult<IEnumerable<StartedDialogue>>> RetunAllStartedDialogues(AuthorizationData authorizationData, int sessionId);
     }
 }

@@ -43,6 +43,10 @@ namespace PrivateAPI.Controllers
         {
             return await _dialoguesRepository.AcceptInDialogue(requestAcceptDialogue, dialogueId, sessionId);
         }
-
+        [HttpPost("getstarteddialogues/{sessionId}")]
+        public async Task<ActionResult<IEnumerable<StartedDialogue>>> GetStartedDialogues([FromBody] AuthorizationData authorizationData, int sessionId)
+        {
+            return await _dialoguesRepository.RetunAllStartedDialogues(authorizationData, sessionId);
+        }
     }
 }

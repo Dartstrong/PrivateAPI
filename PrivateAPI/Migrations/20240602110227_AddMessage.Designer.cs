@@ -10,8 +10,8 @@ using PrivateAPI.Models;
 namespace PrivateAPI.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240601114634_AddMessageCreatedSender")]
-    partial class AddMessageCreatedSender
+    [Migration("20240602110227_AddMessage")]
+    partial class AddMessage
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -118,17 +118,23 @@ namespace PrivateAPI.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("Data")
-                        .HasColumnType("text");
-
                     b.Property<int>("DialogueId")
                         .HasColumnType("integer");
+                    
+                    b.Property<int>("Sender")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SenderData")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Receiver")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReceiverData")
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("ReceivedServer")
                         .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("Sender")
-                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

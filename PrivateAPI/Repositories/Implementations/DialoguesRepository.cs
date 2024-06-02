@@ -231,5 +231,45 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
+        public async Task<ActionResult<IEnumerable<StartedDialogue?>>> RetunAllStartedDialogues(AuthorizationData authorizationData, int sessionId)
+        {
+            var session = await _context.Sessions.FindAsync(sessionId);
+            Crypter crypter = new();
+            (Account account, DeviceID deviceId) userInfo = crypter.Decrypt(authorizationData, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.account.Login);
+            try
+            {
+                if (selectedAccount == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else if (selectedAccount.Sample != userInfo.account.Sample)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else
+                {
+                    var selectedLoginHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId==userInfo.deviceId.Id);
+                    var selectedDialogues = await _context.Dialogues.Where(dialogue => (dialogue.Accepted == selectedLoginHistory.Id
+                                                        || dialogue.Started == selectedLoginHistory.Id) && dialogue.AcceptedDeviceId!=null).ToListAsync();
+                    List<StartedDialogue> outRequests = new();
+                    foreach (var dialogue in selectedDialogues)
+                    {
+                        outRequests.Add(new StartedDialogue
+                        {
+                            IdStr = crypter.Encrypt(dialogue.Id.ToString(), session),
+                            Receiver = (dialogue.Accepted==selectedAccount.Id) ? crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Started).Login, session) : crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Accepted).Login, session),
+                            PublicKeyModulus = (dialogue.Accepted == selectedAccount.Id) ? crypter.Encrypt(dialogue.StartedModulusStr, session) : crypter.Encrypt(dialogue.AcceptedModulusStr, session),
+                            PublicKeyExponent = (dialogue.Accepted == selectedAccount.Id) ? crypter.Encrypt(dialogue.StatedExponentStr, session) : crypter.Encrypt(dialogue.AcceptedExponentStr, session)
+                        });
+                    }
+                    return outRequests;
+                }
+            }
+            catch
+            {
+                return new StatusCodeResult(400);
+            }
+        }
     }
 }
