@@ -73,6 +73,24 @@ namespace PrivateAPI.HelperClasses
                 decryptedPublicKey.ExponentStr = DecryptAES(requestStartDialogue.PublicKeyExponent, decryptor);
             }
             return (decryptedAccount, decryptedDeviceId, decryptedReceiverLogin, decryptedPublicKey);
+        } 
+        public (Account, DeviceID, RSAPublicKey) Decrypt(RequestAcceptDialogue requestAccepttDialogue, Session session)
+        {
+            Account decryptedAccount = new();
+            DeviceID decryptedDeviceId = new();
+            RSAPublicKey decryptedPublicKey = new();
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = StrToIntArrayToByteArray(session.SymmetricKey);
+                aes.IV = StrToIntArrayToByteArray(session.InitVector);
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                decryptedAccount.Login = DecryptAES(requestAccepttDialogue.Accepted, decryptor);
+                decryptedAccount.Sample = ByteArrayToIntArrayToStr(new MD5CryptoServiceProvider().ComputeHash(Encoding.ASCII.GetBytes(DecryptAES(requestAccepttDialogue.AcceptedPassword, decryptor))));
+                decryptedDeviceId.Id = Int16.Parse(DecryptAES(requestAccepttDialogue.AcceptedDeviceId, decryptor));
+                decryptedPublicKey.ModulusStr = DecryptAES(requestAccepttDialogue.PublicKeyModulus, decryptor);
+                decryptedPublicKey.ExponentStr = DecryptAES(requestAccepttDialogue.PublicKeyExponent, decryptor);
+            }
+            return (decryptedAccount, decryptedDeviceId, decryptedPublicKey);
         }
         private string DecryptAES(string data, ICryptoTransform decryptor)
         {

@@ -151,9 +151,6 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
-    }
-}
-    /*
         public async Task<ActionResult<IEnumerable<DialogueRequest?>>> RetunAllIncomingDialogues(AuthorizationData authorizationData, int sessionId)
         {
             var session = await _context.Sessions.FindAsync(sessionId);
@@ -172,26 +169,60 @@ namespace PrivateAPI.Repositories.Implementations
                 }
                 else
                 {
-                    var selectedHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
-                    if (selectedHistory == null)
+                    var selectedDialogues = await _context.Dialogues.Where(dialogue => dialogue.Accepted == selectedAccount.Id
+                                                        && dialogue.AcceptedDeviceId == null).ToListAsync();
+                    List<DialogueRequest> outRequests = new();
+                    foreach (var dialogue in selectedDialogues)
+                    {
+                        outRequests.Add(new DialogueRequest
+                        {
+                            IdStr = crypter.Encrypt(dialogue.Id.ToString(), session),
+                            Sender = crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Started).Login, session),
+                            Receiver = crypter.Encrypt(userInfo.account.Login, session)
+                        });
+                    }
+                    return outRequests;
+                }
+            }
+            catch
+            {
+                return new StatusCodeResult(400);
+            }
+        }
+
+        public async Task<StatusCodeResult> AcceptInDialogue(RequestAcceptDialogue requestAcceptDialogue, int dialogueId, int sessionId)
+        {
+            var session = await _context.Sessions.FindAsync(sessionId);
+            Crypter crypter = new();
+            (Account acceptedAccount, DeviceID acceptedDeviceId, RSAPublicKey publicKey) requestInfo = crypter.Decrypt(requestAcceptDialogue, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == requestInfo.acceptedAccount.Login);
+            try
+            {
+                if (selectedAccount == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else if (selectedAccount.Sample != requestInfo.acceptedAccount.Sample)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else
+                {
+                    var selectedDialogue = await _context.Dialogues.FindAsync(dialogueId);
+                    if(selectedDialogue.Accepted != selectedAccount.Id )
                     {
                         return new StatusCodeResult(400);
                     }
                     else
                     {
-                        var selectedDialogues = await _context.NewDialogues.Where(dialogue => dialogue.Sender == selectedHistory.Id).ToListAsync();
-                        List<DialogueRequest> outRequests = new();
-                        foreach (var dialogue in selectedDialogues)
-                        {
-
-                            outRequests.Add(new DialogueRequest
-                            {
-                                IdStr = crypter.Encrypt(dialogue.Id.ToString(), session),
-                                Sender = crypter.Encrypt(userInfo.account.Login, session),
-                                Receiver = crypter.Encrypt(_context.Accounts.FirstOrDefault(account => account.Id == dialogue.Receiver).Login, session)
-                            });
-                        }
-                        return outRequests;
+                        selectedDialogue.Accepted = selectedAccount.Id;
+                        selectedDialogue.AcceptedDeviceId = requestInfo.acceptedDeviceId.Id;
+                        selectedDialogue.AcceptedModulusStr = requestInfo.publicKey.ModulusStr;
+                        selectedDialogue.AcceptedExponentStr = requestInfo.publicKey.ExponentStr;
+                        selectedDialogue.LastMessage = DateTime.Now;
+                        _context.Dialogues.Update(selectedDialogue);
+                        await _context.SaveChangesAsync();
+                        return new StatusCodeResult(200);
                     }
                 }
             }
@@ -201,4 +232,4 @@ namespace PrivateAPI.Repositories.Implementations
             }
         }
     }
-}*/
+}

@@ -32,12 +32,17 @@ namespace PrivateAPI.Controllers
         {
             return await _dialoguesRepository.DeleteOutDialogue(authorizationData, dialogueId, sessionId);
         }
-        /*
+
         [HttpPost("getincomingdialogues/{sessionId}")]
         public async Task<ActionResult<IEnumerable<DialogueRequest>>> GetIncomingDialogues([FromBody] AuthorizationData authorizationData, int sessionId)
         {
             return await _dialoguesRepository.RetunAllIncomingDialogues(authorizationData, sessionId);
-        }*/
+        }
+        [HttpPost("acceptindialogue/{dialogueId}/{sessionId}")]
+        public async Task<StatusCodeResult> AcceptIncomingDialogues([FromBody] RequestAcceptDialogue requestAcceptDialogue, int dialogueId, int sessionId)
+        {
+            return await _dialoguesRepository.AcceptInDialogue(requestAcceptDialogue, dialogueId, sessionId);
+        }
 
     }
 }
