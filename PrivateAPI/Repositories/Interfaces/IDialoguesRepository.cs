@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using PrivateAPI.Entities;
+using PrivateAPI.Models;
 namespace PrivateAPI.Repositories.Interfaces
 {
     public interface IDialoguesRepository
@@ -14,5 +15,6 @@ namespace PrivateAPI.Repositories.Interfaces
         Task<ActionResult<IEnumerable<DialogueRequest>>> RetunAllIncomingDialogues(AuthorizationData authorizationData, int sessionId);
         Task<StatusCodeResult> AcceptInDialogue(RequestAcceptDialogue requestAcceptDialogue, int dialogueId, int sessionId);
         Task<ActionResult<IEnumerable<StartedDialogue>>> RetunAllStartedDialogues(AuthorizationData authorizationData, int sessionId);
+        Task<ActionResult<IEnumerable<CustomMessage>>> RetunAllDialogueMessages(AuthorizationData authorizationData, int dialogueId, int sessionId);
     }
 }

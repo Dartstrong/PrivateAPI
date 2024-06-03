@@ -271,5 +271,51 @@ namespace PrivateAPI.Repositories.Implementations
                 return new StatusCodeResult(400);
             }
         }
+
+        public async Task<ActionResult<IEnumerable<CustomMessage?>>> RetunAllDialogueMessages(AuthorizationData authorizationData, int dialogueId, int sessionId)
+        {
+            var session = await _context.Sessions.FindAsync(sessionId);
+            Crypter crypter = new();
+            (Account account, DeviceID deviceId) userInfo = crypter.Decrypt(authorizationData, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.account.Login);
+            try
+            {
+                if (selectedAccount == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else if (selectedAccount.Sample != userInfo.account.Sample)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else
+                {
+                    var selectedLoginHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
+                    var selectedDialogue = await _context.Dialogues.FindAsync(dialogueId);
+                    if((selectedDialogue.Started == selectedLoginHistory.Id)||(selectedDialogue.Accepted == selectedLoginHistory.Id))
+                    {
+                        var messages = await _context.Messages.Where(message => message.DialogueId == selectedDialogue.Id).ToListAsync();
+                        List<CustomMessage> customMessages = new();
+                        foreach(var message in messages)
+                        {
+                            customMessages.Add(new CustomMessage
+                            {
+                                Data = (message.Sender == selectedLoginHistory.Id)? crypter.Encrypt(message.SenderData, session) : crypter.Encrypt(message.ReceiverData, session),
+                                ReceivedServer = message.ReceivedServer
+                            });
+                        }
+                        return customMessages;
+                    }
+                    else
+                    {
+                        return new StatusCodeResult(400);
+                    }
+                }
+            }
+            catch
+            {
+                return new StatusCodeResult(400);
+            }
+        }
     }
 }

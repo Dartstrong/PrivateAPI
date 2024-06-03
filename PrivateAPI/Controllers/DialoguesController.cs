@@ -26,7 +26,6 @@ namespace PrivateAPI.Controllers
         {
             return await _dialoguesRepository.RetunAllOutcomingDialogues(authorizationData, sessionId);
         }
-
         [HttpPost("deleteoutdialogue/{dialogueId}/{sessionId}")]
         public async Task<StatusCodeResult> DeleteOutcomingDialogue([FromBody] AuthorizationData authorizationData, int dialogueId, int sessionId)
         {
@@ -47,6 +46,11 @@ namespace PrivateAPI.Controllers
         public async Task<ActionResult<IEnumerable<StartedDialogue>>> GetStartedDialogues([FromBody] AuthorizationData authorizationData, int sessionId)
         {
             return await _dialoguesRepository.RetunAllStartedDialogues(authorizationData, sessionId);
+        }
+        [HttpPost("deleteoutdialogue/{dialogueId}/{sessionId}")]
+        public async Task<ActionResult<IEnumerable<CustomMessage>>> GetAllDialogueMessages([FromBody] AuthorizationData authorizationData, int dialogueId, int sessionId)
+        {
+            return await _dialoguesRepository.RetunAllDialogueMessages(authorizationData, dialogueId, sessionId);
         }
     }
 }
