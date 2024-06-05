@@ -47,10 +47,15 @@ namespace PrivateAPI.Controllers
         {
             return await _dialoguesRepository.RetunAllStartedDialogues(authorizationData, sessionId);
         }
-        [HttpPost("deleteoutdialogue/{dialogueId}/{sessionId}")]
+        [HttpPost("getdialoguemes/{dialogueId}/{sessionId}")]
         public async Task<ActionResult<IEnumerable<CustomMessage>>> GetAllDialogueMessages([FromBody] AuthorizationData authorizationData, int dialogueId, int sessionId)
         {
             return await _dialoguesRepository.RetunAllDialogueMessages(authorizationData, dialogueId, sessionId);
+        }
+        [HttpPost("createdialoguemes/{dialogueId}/{sessionId}")]
+        public async Task<StatusCodeResult> CreateAllDialogueMessages([FromBody] NewMessage newMessage, int dialogueId, int sessionId)
+        {
+            return await _dialoguesRepository.CreateDialogueMessages(newMessage, dialogueId, sessionId);
         }
     }
 }

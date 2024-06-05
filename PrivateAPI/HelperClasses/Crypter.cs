@@ -92,6 +92,25 @@ namespace PrivateAPI.HelperClasses
             }
             return (decryptedAccount, decryptedDeviceId, decryptedPublicKey);
         }
+        public (Account, DeviceID, string, string) Decrypt(NewMessage newMessagee, Session session)
+        {
+            Account decryptedAccount = new();
+            DeviceID decryptedDeviceId = new();
+            string senderMessage;
+            string receiverMessage;
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = StrToIntArrayToByteArray(session.SymmetricKey);
+                aes.IV = StrToIntArrayToByteArray(session.InitVector);
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+                decryptedAccount.Login = DecryptAES(newMessagee.LoginStr, decryptor);
+                decryptedAccount.Sample = ByteArrayToIntArrayToStr(new MD5CryptoServiceProvider().ComputeHash(Encoding.ASCII.GetBytes(DecryptAES(newMessagee.PasswordStr, decryptor))));
+                decryptedDeviceId.Id = Int16.Parse(DecryptAES(newMessagee.DeviceIdStr, decryptor));
+                senderMessage = DecryptAES(newMessagee.SenderData, decryptor);
+                receiverMessage = DecryptAES(newMessagee.ReceiverData, decryptor);
+            }
+            return (decryptedAccount, decryptedDeviceId, senderMessage, receiverMessage);
+        }
         private string DecryptAES(string data, ICryptoTransform decryptor)
         {
             using (MemoryStream msDecrypt = new(StrToIntArrayToByteArray(data)))

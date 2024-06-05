@@ -300,6 +300,7 @@ namespace PrivateAPI.Repositories.Implementations
                         {
                             customMessages.Add(new CustomMessage
                             {
+                                My = (message.Sender == selectedLoginHistory.Id),
                                 Data = (message.Sender == selectedLoginHistory.Id)? crypter.Encrypt(message.SenderData, session) : crypter.Encrypt(message.ReceiverData, session),
                                 ReceivedServer = message.ReceivedServer
                             });
@@ -310,6 +311,45 @@ namespace PrivateAPI.Repositories.Implementations
                     {
                         return new StatusCodeResult(400);
                     }
+                }
+            }
+            catch
+            {
+                return new StatusCodeResult(400);
+            }
+        }
+        public async Task<StatusCodeResult> CreateDialogueMessages(NewMessage newMessage, int dialogueId, int sessionId)
+        {
+            var session = await _context.Sessions.FindAsync(sessionId);
+            Crypter crypter = new();
+            (Account account, DeviceID deviceId, string senderMessage, string receiverMessage) userInfo = crypter.Decrypt(newMessage, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.account.Login);
+            try
+            {
+                if (selectedAccount == null)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else if (selectedAccount.Sample != userInfo.account.Sample)
+                {
+                    return new StatusCodeResult(400);
+                }
+                else
+                {
+                    var selectedLoginHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
+                    var selectedDialogue = await _context.Dialogues.FindAsync(dialogueId);
+                    Message creatingMessage = new()
+                    {
+                        DialogueId = selectedDialogue.Id,
+                        Sender = selectedLoginHistory.Id,
+                        SenderData = userInfo.senderMessage,
+                        Receiver = (selectedDialogue.Started == selectedLoginHistory.Id) ? selectedDialogue.Accepted : selectedDialogue.Started,
+                        ReceiverData = userInfo.receiverMessage,
+                        ReceivedServer = DateTime.Now
+                    };
+                    _context.Messages.Add(creatingMessage);
+                    await _context.SaveChangesAsync();
+                    return new StatusCodeResult(200);
                 }
             }
             catch

@@ -16,5 +16,6 @@ namespace PrivateAPI.Repositories.Interfaces
         Task<StatusCodeResult> AcceptInDialogue(RequestAcceptDialogue requestAcceptDialogue, int dialogueId, int sessionId);
         Task<ActionResult<IEnumerable<StartedDialogue>>> RetunAllStartedDialogues(AuthorizationData authorizationData, int sessionId);
         Task<ActionResult<IEnumerable<CustomMessage>>> RetunAllDialogueMessages(AuthorizationData authorizationData, int dialogueId, int sessionId);
+        Task<StatusCodeResult> CreateDialogueMessages(NewMessage newMessage, int dialogueId, int sessionId);
     }
 }
