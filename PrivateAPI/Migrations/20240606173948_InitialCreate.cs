@@ -77,7 +77,10 @@ namespace PrivateAPI.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DialogueId = table.Column<int>(nullable: false),
-                    Data = table.Column<string>(nullable: true),
+                    Sender = table.Column<int>(nullable: false),
+                    SenderData = table.Column<string>(nullable: true),
+                    Receiver = table.Column<int>(nullable: false),
+                    ReceiverData = table.Column<string>(nullable: true),
                     ReceivedServer = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>

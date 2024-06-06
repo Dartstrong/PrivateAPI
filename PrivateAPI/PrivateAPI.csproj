@@ -5,13 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20240601114534_AddMessageCreatedSender.cs" />
-    <Compile Remove="Migrations\20240601114534_AddMessageCreatedSender.Designer.cs" />
-    <Compile Remove="Migrations\20240602105236_AddMessageCreatedReceiver.cs" />
-    <Compile Remove="Migrations\20240602105236_AddMessageCreatedReceiver.Designer.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.16" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.16">
       <PrivateAssets>all</PrivateAssets>

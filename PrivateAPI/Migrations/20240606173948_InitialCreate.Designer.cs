@@ -10,8 +10,8 @@ using PrivateAPI.Models;
 namespace PrivateAPI.Migrations
 {
     [DbContext(typeof(Context))]
-    [Migration("20240602110227_AddMessage")]
-    partial class AddMessage
+    [Migration("20240606173948_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -120,12 +120,9 @@ namespace PrivateAPI.Migrations
 
                     b.Property<int>("DialogueId")
                         .HasColumnType("integer");
-                    
-                    b.Property<int>("Sender")
-                        .HasColumnType("integer");
 
-                    b.Property<string>("SenderData")
-                        .HasColumnType("text");
+                    b.Property<DateTime>("ReceivedServer")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Receiver")
                         .HasColumnType("integer");
@@ -133,8 +130,11 @@ namespace PrivateAPI.Migrations
                     b.Property<string>("ReceiverData")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("ReceivedServer")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<int>("Sender")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("SenderData")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
