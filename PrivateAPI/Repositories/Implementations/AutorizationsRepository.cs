@@ -7,6 +7,7 @@ using PrivateAPI.Entities;
 using PrivateAPI.HelperClasses;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace PrivateAPI.Repositories.Implementations
 {
@@ -85,6 +86,34 @@ namespace PrivateAPI.Repositories.Implementations
                         };
                         _context.LoginHistories.Add(loginHistory);
                         await _context.SaveChangesAsync();
+                        LastEntryDate lastEntry = new()
+                        {
+                            LoginHistoryId = loginHistory.Id,
+                            DateTime = DateTime.Now
+                        };
+                        _context.LastEntries.Add(lastEntry);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        var loginHistory = _context.LoginHistories.FirstOrDefault(history => history.AccountId == selectedAccount.Id && history.DeviceId == userInfo.deviceId.Id);
+                        var lastEntry = _context.LastEntries.FirstOrDefault(record => record.LoginHistoryId == loginHistory.Id);
+                        if(lastEntry == null)
+                        {
+                            LastEntryDate newLastEntry = new()
+                            {
+                                LoginHistoryId = loginHistory.Id,
+                                DateTime = DateTime.Now
+                            };
+                            _context.LastEntries.Add(newLastEntry);
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            lastEntry.DateTime = DateTime.Now;
+                            _context.LastEntries.Update(lastEntry);
+                            await _context.SaveChangesAsync();
+                        }
                     }
                     return new StatusCodeResult(200);
                 }
@@ -93,7 +122,44 @@ namespace PrivateAPI.Repositories.Implementations
             {
                 return new StatusCodeResult(400);
             }
+        }
 
+        public async Task<ActionResult<IEnumerable<LoginEntry>>> ReturnAllLoginHistory(AuthorizationData authorizationData, int sessionId)
+        {
+            var session = await _context.Sessions.FindAsync(sessionId);
+            Crypter crypter = new();
+            (Account account, DeviceID deviceId) userInfo = crypter.Decrypt(authorizationData, session);
+            var selectedAccount = _context.Accounts.FirstOrDefault(account => account.Login == userInfo.account.Login);
+            try
+            {
+                if (selectedAccount == null)
+                {
+                    return new StatusCodeResult(401);
+                }
+                else if (selectedAccount.Sample != userInfo.account.Sample)
+                {
+                    return new StatusCodeResult(403);
+                }
+                else
+                {
+                    var selectedLoginHistory = await _context.LoginHistories.Where(history => history.AccountId == selectedAccount.Id).ToListAsync();
+                    List<LoginEntry> loginEntries= new();
+                    foreach(var record in selectedLoginHistory)
+                    {
+                        LoginEntry loginEntry = new()
+                        {
+                            DeviceIdStr = crypter.Encrypt(record.DeviceId.ToString(), session),
+                            Date = _context.LastEntries.FirstOrDefault(entry => entry.LoginHistoryId == record.Id).DateTime
+                        };
+                        loginEntries.Add(loginEntry);
+                    }
+                    return loginEntries;
+                }
+            }
+            catch
+            {
+                return new StatusCodeResult(400);
+            }
         }
     }
 }

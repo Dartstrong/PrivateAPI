@@ -2,6 +2,7 @@
 using PrivateAPI.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using PrivateAPI.Entities;
+using System.Collections.Generic;
 namespace PrivateAPI.Controllers
 {
     [Route("api/autorization")]
@@ -26,6 +27,11 @@ namespace PrivateAPI.Controllers
         public async Task<StatusCodeResult> Autorization([FromBody] AuthorizationData authorizationData, int sessionId)
         {
             return await _autorizationsRepository.Autorization(authorizationData, sessionId);
+        }
+        [HttpPost("getloginentries/{sessionId}")]
+        public async Task<ActionResult<IEnumerable<LoginEntry>>> GetLoginEntries([FromBody] AuthorizationData authorizationData, int sessionId)
+        {
+            return await _autorizationsRepository.ReturnAllLoginHistory(authorizationData, sessionId);
         }
     }
 }
