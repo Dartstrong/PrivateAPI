@@ -49,6 +49,7 @@ namespace PrivateAPI.Repositories.Implementations
                         };
                         _context.LoginHistories.Add(loginHistory);
                         await _context.SaveChangesAsync();
+                        await Autorization(authorizationData, sessionId);
                     }
                     return new StatusCodeResult(200);
                 }
